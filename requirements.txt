@@ -5,3 +5,5 @@ openai
 pylint
 isort
 black
+scipy
+tiktoken
