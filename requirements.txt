@@ -4,3 +4,4 @@ streamlit
 openai
 pylint
 isort
+black
