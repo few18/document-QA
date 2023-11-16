@@ -2,11 +2,13 @@ import numpy as np
 import openai
 import pandas as pd
 import streamlit as st
-from utils.data import load_data
+from utils import load_data
 import os
 
 
 st.header("Chat with Your Document")
+
+client = openai.OpenAI()
 
 
 # Initialize chat message history
@@ -19,8 +21,8 @@ if "messages" not in st.session_state.keys():
 embeddings = load_data()
 
 # Prompt for user input and save to chat history
-if prompt := st.chat_input("Your question"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+if query := st.chat_input("Your question"):
+    st.session_state.messages.append({"role": "user", "content": query})
 
 # Display the prior chat messages
 for message in st.session_state.messages:
