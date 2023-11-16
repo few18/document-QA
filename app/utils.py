@@ -9,6 +9,7 @@ import numpy as np
 
 # Set embedding model
 EMBEDDING_MODEL = "text-embedding-ada-002"
+GPT_MODEL = "gpt-3.5-turbo"
 
 
 def partition_text(file):
@@ -80,3 +81,30 @@ def load_data(client):
             df = pd.read_csv("../data/embeddings.csv")
             df["ada_embedding"] = df.ada_embedding.apply(eval).apply(np.array)
     return df
+
+
+def construct_prompt(query, similar_faqs):
+    faqs = similar_faqs["qa"].tolist()
+    newline = "\n\n"
+    return f"""```{newline.join(faqs)}```
+
+{query}
+"""
+
+
+def ask_gpt(query, embeddings, client, n):
+    """Send query with top n similar matches to gpt 3.5 turbo"""
+
+    similar_faqs = get_n_faq(embeddings, query, n, client)
+    message = construct_prompt(query, similar_faqs)
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant answering peoples questions. You will use text extracts from frequently asked questions documents to answer the users questions. The extracts are given within the triple single quotes and are separated by new lines. Answer the users question using only the information in these extracts. Do not use any other information you have. If the answer to the users question is not in the extracts you will not give an alternative answer instead state that you could not find the desired answer.",
+        },
+        {"role": "user", "content": message},
+    ]
+    response = openai.ChatCompletion.create(
+        model=GPT_MODEL, messages=messages, temperature=0
+    )
+    return response["choices"][0]["message"]["content"]
