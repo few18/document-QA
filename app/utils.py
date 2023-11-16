@@ -1,8 +1,9 @@
 import streamlit as st
 import ast
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 import pandas as pd
-import tiktoken
 from scipy import spatial
 import os
 import numpy as np
@@ -67,7 +68,7 @@ def get_n_faq(df, query, n, client):
     return results
 
 
-@st.cache_resource(show_spinner=True)
+@st.cache_resource
 def load_data(client):
     with st.spinner(
         text="Loading and embedding your document – hang tight! This should not take too long."
@@ -104,7 +105,5 @@ def ask_gpt(query, embeddings, client, n):
         },
         {"role": "user", "content": message},
     ]
-    response = openai.ChatCompletion.create(
-        model=GPT_MODEL, messages=messages, temperature=0
-    )
+    response = client.chat.completions.create(model=GPT_MODEL, messages=messages, temperature=0)
     return response["choices"][0]["message"]["content"]

@@ -6,4 +6,4 @@ pylint
 isort
 black
 scipy
-tiktoken
+altair<5 
